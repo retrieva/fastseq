@@ -23,7 +23,7 @@ MAX_TRANSFORMER_VERSION = '4.12.5'
 
 # supported versions of fairseq
 MIN_FAIRSEQ_VERSION = '0.10.0'
-MAX_FAIRSEQ_VERSION = '0.10.2'
+MAX_FAIRSEQ_VERSION = '1.0.1'
 
 #Set following variable to use Efficient-Lossless Attention
 USE_EL_ATTN = True if os.getenv('USE_EL_ATTN', '0') == '1' else False

@@ -12,7 +12,7 @@ import torch.nn.functional as F
 from torch import Tensor
 
 from fairseq import utils
-from fairseq.models.transformer import TransformerEncoder, TransformerModel
+from fairseq.models.transformer import TransformerEncoderBase, TransformerModel
 from fairseq.modules.multihead_attention import MultiheadAttention
 from fairseq.search import BeamSearch
 from fairseq.sequence_generator import SequenceGenerator
@@ -70,8 +70,8 @@ class BeamSearch(BeamSearch):
 
         return scores_buf, indices_buf, beams_buf
 
-@replace(TransformerEncoder, USE_OPTIMIZED_CACHE_ATTN)
-class TransformerEncoder(TransformerEncoder):
+@replace(TransformerEncoderBase, USE_OPTIMIZED_CACHE_ATTN)
+class TransformerEncoderBase(TransformerEncoderBase):
     """
     Transformer encoder consisting of *args.encoder_layers* layers. Each layer
     is a :class:`TransformerEncoderLayer`.

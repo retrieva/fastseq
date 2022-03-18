@@ -20,6 +20,7 @@ from fairseq.logging import progress_bar
 from fairseq.logging.meters import StopwatchMeter, TimeMeter
 from fastseq.utils.api_decorator import replace
 from fairseq.options import add_generation_args
+from fairseq.dataclass.utils import convert_namespace_to_omegaconf
 
 GENERATE_FINISHED = "done"
 POSTPROCESS_FINISHED = None
@@ -99,7 +100,7 @@ class IOProcess(Process):
             elif msg == GENERATE_FINISHED:
                 if self.has_target:
                     if self.args.bpe and not self.args.sacrebleu:
-                        if self.args.remove_bpe:
+                        if self.args.post_process:
                             print("BLEU score is being computed by splitting detokenized string on spaces, this is probably not what you want. Use --sacrebleu for standard 13a BLEU tokenization")
                         else:
                             print("If you are using BPE on the target side, the BLEU score is computed on BPE tokens, not on proper words.  Use --sacrebleu for standard 13a BLEU tokenization")
@@ -196,13 +197,13 @@ class PostProcess(Process):
             else:
                 if self.src_dict is not None:
                     src_str = self.src_dict.string(src_tokens,
-                                                   self.args.remove_bpe)
+                                                   self.args.post_process)
                 else:
                     src_str = ""
                 if has_target:
                     target_str = self.tgt_dict.string(
                         target_tokens, 
-                        self.args.remove_bpe, 
+                        self.args.post_process,
                         escape_unk = True,
                         extra_symbols_to_ignore = self._get_symbols_to_strip_from_output(self.generator),
                         )
@@ -230,7 +231,7 @@ class PostProcess(Process):
                         alignment = hypo['alignment'],
                         align_dict = self.align_dict,
                         tgt_dict = self.tgt_dict,
-                        remove_bpe = self.args.remove_bpe,
+                        remove_bpe = self.args.post_process,
                         extra_symbols_to_ignore = self._get_symbols_to_strip_from_output(self.generator),
                     )
                 if not self.args.quiet:
@@ -271,7 +272,7 @@ class PostProcess(Process):
                 # Score only the top hypothesis
                 if has_target and j == 0:
                     if (self.align_dict is not None or
-                        self.args.remove_bpe is not None):
+                        self.args.post_process is not None):
                         
                         # Convert back to tokens for evaluation with unk
                         # replacement and/or without BPE
@@ -359,7 +360,8 @@ def _main(args, output_file):
             model.half()
         if use_cuda and not args.pipeline_model_parallel:
             model.cuda()
-        model.prepare_for_inference_(args)
+        cfg = convert_namespace_to_omegaconf(args)
+        model.prepare_for_inference_(cfg)
 
     # Load dataset (possibly sharded)
     itr = task.get_batch_iterator(
