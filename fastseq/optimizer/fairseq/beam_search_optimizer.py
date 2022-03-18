@@ -71,7 +71,7 @@ class BeamSearch(BeamSearch):
         return scores_buf, indices_buf, beams_buf
 
 @replace(TransformerEncoder, USE_OPTIMIZED_CACHE_ATTN)
-class TransformerEncoder(TransformerEncoder):
+class TransformerEncoderBase(TransformerEncoder):
     """
     Transformer encoder consisting of *args.encoder_layers* layers. Each layer
     is a :class:`TransformerEncoderLayer`.

@@ -9,11 +9,11 @@ import torch
 import torch.nn.functional as F
 from torch import Tensor
 from fairseq import utils
-from fairseq.models.transformer import TransformerEncoder, TransformerDecoder, TransformerModel
+from fairseq.models.transformer import TransformerEncoder, TransformerEncoderBase, TransformerDecoderBase, TransformerModel
 from fairseq.modules.multihead_attention import MultiheadAttention
 from fairseq.sequence_generator import SequenceGenerator, EnsembleModel
 from fairseq.models.fairseq_model import FairseqEncoderDecoderModel
-from fairseq.modules.transformer_layer import TransformerDecoderLayer
+from fairseq.modules.transformer_layer import TransformerDecoderLayerBase
 from fairseq.tasks.fairseq_task import FairseqTask
 from fairseq.data.data_utils import collate_tokens
 from fastseq.utils.api_decorator import replace
@@ -64,8 +64,8 @@ class FairseqTask(FairseqTask):
         for model in models:
             model.transpose_enc_dec_kv_proj()
 
-@replace(TransformerDecoderLayer, USE_EL_ATTN)
-class TransformerDecoderLayer(TransformerDecoderLayer):
+@replace(TransformerDecoderLayerBase, USE_EL_ATTN)
+class TransformerDecoderLayerBase(TransformerDecoderLayerBase):
     def forward(
         self,
         x,
@@ -205,8 +205,8 @@ class TransformerDecoderLayer(TransformerDecoderLayer):
             return x, attn, self_attn_state
         return x, attn, None
 
-@replace(TransformerEncoder, USE_EL_ATTN)
-class TransformerEncoder(TransformerEncoder):
+@replace(TransformerEncoderBase, USE_EL_ATTN)
+class TransformerEncoderBase(TransformerEncoderBase):
     """
     Transformer encoder consisting of *args.encoder_layers* layers. Each layer
     is a :class:`TransformerEncoderLayer`.
@@ -372,8 +372,8 @@ class EnsembleModel(EnsembleModel):
             )
         return new_outs
 
-@replace(TransformerDecoder, USE_EL_ATTN)
-class TransformerDecoder(TransformerDecoder):
+@replace(TransformerDecoderBase, USE_EL_ATTN)
+class TransformerDecoderBase(TransformerDecoderBase):
     """
     Transformer decoder consisting of *args.decoder_layers* layers. Each layer
     is a :class:`TransformerDecoderLayer`.
